@@ -1,45 +1,44 @@
 <template>
-    <component
-        :dusk="currentField.attribute"
-        :is="currentField.fullWidth ? 'FullWidthField' : 'default-field'"
+  <component
+    :dusk="currentField.attribute"
+    :is="currentField.fullWidth ? 'FullWidthField' : 'default-field'"
+    :field="currentField"
+    :errors="errors"
+    :show-help-text="showHelpText"
+    full-width-content
+  >
+    <template #field>
+      <div ref="flexibleFieldContainer">
+        <form-nova-flexible-content-group
+          v-for="(group, index) in orderedGroups"
+          :dusk="currentField.attribute + '-' + index"
+          :key="group.key"
+          :field="currentField"
+          :group="group"
+          :index="index"
+          :resource-name="resourceName"
+          :resource-id="resourceId"
+          :errors="errors"
+          :mode="mode"
+          @move-up="moveUp(group.key)"
+          @move-down="moveDown(group.key)"
+          @remove="remove(group.key)"
+        />
+      </div>
+
+      <component
+        :layouts="layouts"
+        :is="currentField.menu.component"
         :field="currentField"
+        :limit-counter="limitCounter"
+        :limit-per-layout-counter="limitPerLayoutCounter"
         :errors="errors"
-        :show-help-text="showHelpText"
-        full-width-content>
-        <template #field>
-
-            <div ref="flexibleFieldContainer">
-                <form-nova-flexible-content-group
-                    v-for="(group, index) in orderedGroups"
-                    :dusk="currentField.attribute + '-' + index"
-                    :key="group.key"
-                    :field="currentField"
-                    :group="group"
-                    :index="index"
-                    :resource-name="resourceName"
-                    :resource-id="resourceId"
-                    :errors="errors"
-                    :mode="mode"
-                    @move-up="moveUp(group.key)"
-                    @move-down="moveDown(group.key)"
-                    @remove="remove(group.key)"
-                />
-            </div>
-
-            <component
-                :layouts="layouts"
-                :is="currentField.menu.component"
-                :field="currentField"
-                :limit-counter="limitCounter"
-                :limit-per-layout-counter="limitPerLayoutCounter"
-                :errors="errors"
-                :resource-name="resourceName"
-                :resource-id="resourceId"
-                @addGroup="addGroup($event)"
-            />
-
-        </template>
-    </component>
+        :resource-name="resourceName"
+        :resource-id="resourceId"
+        @addGroup="addGroup($event)"
+      />
+    </template>
+  </component>
 </template>
 
 <script>
@@ -117,7 +116,7 @@ export default {
             this.value = this.currentField.value || [];
             this.files = {};
 
-            this.populateGroups();
+            this.populateGroups(true);
             this.$nextTick(this.initSortable.bind(this));
         },
 
@@ -184,14 +183,19 @@ export default {
         /**
          * Set the displayed layouts from the field's current value
          */
-        populateGroups() {
+        populateGroups(firstLoad = false) {
             this.order.splice(0, this.order.length);
             this.groups = {};
 
             for (var i = 0; i < this.value.length; i++) {
+                const attr = firstLoad ? {
+                    ...this.value[i].attributes,
+                    readonly: true
+                } : this.value[i].attributes,
+
                 this.addGroup(
                     this.getLayout(this.value[i].layout),
-                    this.value[i].attributes,
+                    attr,
                     this.value[i].key,
                     this.currentField.collapsed
                 );

@@ -28,7 +28,7 @@
                       {{ group.title }}
                     </p>
 
-                    <div class="flex" v-if="!readonly">
+                    <div class="flex" v-if="false">
                         <button
                             dusk="drag-group"
                             type="button"
