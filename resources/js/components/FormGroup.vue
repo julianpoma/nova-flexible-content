@@ -36,7 +36,7 @@
                             :title="__('Drag')"
                             >
                             <icon type="selector" class="align-top" width="16" height="16" />
-                        </button>
+                        </button> -->
                         <button
                             dusk="move-up-group"
                             type="button"
